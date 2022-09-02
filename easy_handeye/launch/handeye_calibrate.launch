@@ -1,0 +1,51 @@
+<launch>
+
+
+
+  <!-- (start your robot's MoveIt! stack, e.g. include its moveit_planning_execution.launch) -->
+
+
+  <!-- (start your tracking system's ROS driver) -->
+
+    <arg name="marker_size" doc="Size of the ArUco marker used, in meters" default="0.016" />
+    <arg name="square_size" doc="The ID of the ArUco marker used" default="0.024" />
+    <arg name="square_number_x" default="7" />
+    <arg name="square_number_y" default="9" />
+    <arg name="camera_namespace" default="/camera/color" />
+
+    <!-- start easy aruco -->
+    <node name="easy_aruco_node" pkg="easy_aruco" type="easy_aruco_node">
+
+        <param name="object_type" value="charuco_board" />
+        <param name="camera_namespace" value="$(arg camera_namespace)" />
+        <param name="dictionary" value="DICT_6X6_250" />
+
+        <param name="camera_frame" value="camera_color_optical_frame" />
+        <!-- <param name="reference_frame" value="camera_link" /> -->
+        <param name="reference_frame" value="camera_link" />
+
+        <param name="marker_size" value="$(arg marker_size)" />
+        <param name="square_size" value="$(arg square_size)" />
+        <param name="square_number_x" value="$(arg square_number_x)" />
+        <param name="square_number_y" value="$(arg square_number_y)" />
+    </node>
+
+
+
+  <include file="$(find easy_handeye)/launch/calibrate.launch">
+    <arg name="eye_on_hand" value="false"/>
+    <arg name="namespace_prefix" value="my_eob_calib"/>
+    <arg name="freehand_robot_movement" value="true" />
+
+    <!-- fill in the following parameters according to your robot's published tf frames -->
+    <arg name="robot_base_frame" value="base_link"/>
+    <arg name="robot_effector_frame" value="tool0"/>
+
+    <!-- fill in the following parameters according to your tracking system's published tf frames -->
+    <arg name="tracking_base_frame" value="camera_link"/>
+    <!-- <arg name="tracking_base_frame" value="camera_color_optical_frame"/> -->
+    <arg name="tracking_marker_frame" value="board"/>
+  </include>
+
+
+</launch>
