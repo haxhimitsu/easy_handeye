@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import tf2_ros
@@ -35,18 +35,20 @@ if overriding_tracking_base_frame != "":
 rospy.loginfo('loading calibration parameters into namespace {}'.format(
     rospy.get_namespace()))
 HandeyeCalibration.store_to_parameter_server(calib)
+r = rospy.Rate(1000) # 10hz
+while not rospy.is_shutdown():
+    orig = calib.transformation.header.frame_id  # tool or base link
+    dest = calib.transformation.child_frame_id  # tracking_base_frame
 
-orig = calib.transformation.header.frame_id  # tool or base link
-dest = calib.transformation.child_frame_id  # tracking_base_frame
+    broadcaster = tf2_ros.StaticTransformBroadcaster()
+    static_transformStamped = geometry_msgs.msg.TransformStamped()
 
-broadcaster = tf2_ros.StaticTransformBroadcaster()
-static_transformStamped = geometry_msgs.msg.TransformStamped()
+    static_transformStamped.header.stamp = rospy.Time.now()
+    static_transformStamped.header.frame_id = orig
+    static_transformStamped.child_frame_id = dest
 
-static_transformStamped.header.stamp = rospy.Time.now()
-static_transformStamped.header.frame_id = orig
-static_transformStamped.child_frame_id = dest
+    static_transformStamped.transform = calib.transformation.transform
 
-static_transformStamped.transform = calib.transformation.transform
-
-broadcaster.sendTransform(static_transformStamped)
-rospy.spin()
+    broadcaster.sendTransform(static_transformStamped)
+    # rospy.spin()
+    r.sleep()
